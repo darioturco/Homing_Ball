@@ -7,24 +7,22 @@ using UnityEngine.UI;
 public class Main : MonoBehaviour {//7/1/2018
 	public GameObject pelota, flecha, aux, objetivo, menu_obj, gana_obj;
 	public GameObject[] obj, dest;
-	public Boton vel_x, menu, reset, cancel, nuevo_map, compartir, nuevo_map_v, atras_v, press_bot;
-	public Text gana_text, borra;
+	public Boton vel_x, menu, reset, cancel, nuevo_map, compartir, nuevo_map_v, atras_v, press_bot, rojo, verde, azul;
+	public Text gana_text, start_text, menu_text;
+	public Image vel_img, reset_img, press_img, gana_img, menu_img, map1_img, can_img, dif1_img, map2_img, vol_img, dif2_img, comp_img;
+	public Color[] claro, oscuro, solido, slider, victoria;
 	public Slider dif_sld_menu, dif_sld_gana;
-	public CircleCollider2D cir;
-	public Rigidbody2D rigid;
 	public ParticleSystem part;
 	public Animator anim;
 	public AudioSource menu_aud, pelota_aud, objet_aud;
 	public AudioClip bot_son;
-	public bool pulsa, disparo, move, pausa, gano, press;
-	public int i, cont, difi;
-	public float ang, max, mid_x, pos_y, time;
-	public Vector2 ini, fin, pun;
 	public LayerMask mask;
-
-
-	/*private bool isProcessing = false;
-	private bool isFocus = false;*/
+	private CircleCollider2D cir;
+	private Rigidbody2D rigid;
+	private bool pulsa, disparo, move, pausa, gano, press, isProcessing, isFocus;
+	private int i, cont, difi;
+	private float ang, max, mid_x, pos_y, time;
+	private Vector2 ini, fin, pun;
 
 	void Awake () {
 		cir = objetivo.GetComponent<CircleCollider2D>();
@@ -34,10 +32,10 @@ public class Main : MonoBehaviour {//7/1/2018
 		max = GameObject.Find("Arriba").transform.position.y-3.4f;
 		mid_x = 5.75f;
 		difi = 6;
-		ajusta_camara();
 
+		/*borrar*/
 		string aus_s = Application.systemLanguage.ToString();
-		borra.text = aus_s;
+		start_text.text = aus_s;
 		//Debug.Log(aus_s);
 	}
 	IEnumerator crea_pro(float inicio, float dist, int max_obj, bool col, bool res){//inicion = poscision en la que los bloques empiezan a generarse
@@ -101,7 +99,6 @@ public class Main : MonoBehaviour {//7/1/2018
 	IEnumerator press_cor(){
 		yield return new WaitForSeconds(menu_aud.clip.length);
 		menu_aud.clip = bot_son;
-		//ShareBtnPress();//borrar
 		ajusta_nivel();
 		press = true;
 	}
@@ -142,59 +139,55 @@ public class Main : MonoBehaviour {//7/1/2018
 			break;
 		}
 	}
-	public void ajusta_camara(){
-	
+	void cambia_color(int num){
+		start_text.color = new Color(solido[num].r,solido[num].g,solido[num].b,start_text.color.a);
+		menu_text.color = new Color(claro[num].r,claro[num].g,claro[num].b,menu_text.color.a);
+		vel_img.color = new Color(claro[num].r,claro[num].g,claro[num].b,vel_img.color.a);
+		reset_img.color = new Color(claro[num].r,claro[num].g,claro[num].b,reset_img.color.a);
+		press_img.color = new Color(oscuro[num].r,oscuro[num].g,oscuro[num].b,press_img.color.a);
+		gana_img.color = new Color(oscuro[num].r,oscuro[num].g,oscuro[num].b,gana_img.color.a);
+		menu_img.color = new Color(oscuro[num].r,oscuro[num].g,oscuro[num].b,menu_img.color.a);
+		map1_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,map1_img.color.a);
+		can_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,can_img.color.a);
+		dif1_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,dif1_img.color.a);
+		map2_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,map2_img.color.a);
+		vol_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,vol_img.color.a);
+		dif2_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,dif2_img.color.a);
+		comp_img.color = new Color(solido[num].r,solido[num].g,solido[num].b,comp_img.color.a);
+		gana_text.color = new Color(victoria[num].r,victoria[num].g,victoria[num].b,gana_text.color.a);
 	}
-
-	/*Share*/
-	/*public void ShareBtnPress()
-	{
-		if (!isProcessing)
-		{
-			//CanvasShareObj.SetActive(true);
+	public void ShareBtnPress(){
+		if(!isProcessing){
 			StartCoroutine(ShareScreenshot());
 		}
 	}
-	IEnumerator ShareScreenshot()
-	{
+	IEnumerator ShareScreenshot(){
 		isProcessing = true;
-		
 		yield return new WaitForEndOfFrame();
-		
 		ScreenCapture.CaptureScreenshot("screenshot.png", 2);
 		string destination = Path.Combine(Application.persistentDataPath, "screenshot.png");
-		
 		yield return new WaitForSecondsRealtime(0.3f);
-		
-		if (!Application.isEditor)
-		{
+		if (!Application.isEditor){
 			AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
 			AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent");
 			intentObject.Call<AndroidJavaObject>("setAction", intentClass.GetStatic<string>("ACTION_SEND"));
 			AndroidJavaClass uriClass = new AndroidJavaClass("android.net.Uri");
 			AndroidJavaObject uriObject = uriClass.CallStatic<AndroidJavaObject>("parse", "file://" + destination);
 			intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_STREAM"), uriObject);
-			intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), "Can you beat my score?");
+			intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), "Mira este increible juego: Homing Ball");
 			intentObject.Call<AndroidJavaObject>("setType", "image/jpeg");
 			AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
 			AndroidJavaObject currentActivity = unity.GetStatic<AndroidJavaObject>("currentActivity");
 			AndroidJavaObject chooser = intentClass.CallStatic<AndroidJavaObject>("createChooser", intentObject, "Share your new score");
 			currentActivity.Call("startActivity", chooser);
-			
 			yield return new WaitForSecondsRealtime(1);
 		}
-		
 		yield return new WaitUntil(() => isFocus);
-
-		//CanvasShareObj.SetActive(false);
 		isProcessing = false;
 	}
-	private void OnApplicationFocus (bool focus)
-	{
+	private void OnApplicationFocus (bool focus) {
 		isFocus = focus;
-	}*/
-	/*****/
-	
+	}
 	void Update () {
 		if(press == true){
 			if(gano == true){
@@ -218,7 +211,7 @@ public class Main : MonoBehaviour {//7/1/2018
 					objetivo.SetActive(true);//reinicia el objetivo
 				}
 				if(compartir.up == true){//Comparte con las redes sociales
-					Debug.Log("Comparte¡¡¡");
+					ShareBtnPress();
 				}
 				difi = Mathf.RoundToInt(dif_sld_gana.value);
 			}else{
@@ -252,6 +245,15 @@ public class Main : MonoBehaviour {//7/1/2018
 						menu_aud.Play();
 						menu_obj.SetActive(false);
 					}
+					if(rojo.up == true){
+						cambia_color(0);//rojo
+					}
+					if(verde.up == true){
+						cambia_color(1);//verde
+					}
+					if(azul.up == true){
+						cambia_color(2);//azul
+					}
 					difi = Mathf.RoundToInt(dif_sld_menu.value);
 				}else{
 					if(menu.up == true){//entra al menu
@@ -261,25 +263,10 @@ public class Main : MonoBehaviour {//7/1/2018
 						dif_sld_menu.value = difi;
 					}
 					if(disparo == false){
-						if(Input.touches.Length > 0){/*Control touch*/
-							fin = Input.touches[0].position/100;
-							ang = Mathf.Atan(fin.y/fin.x);
-							ang = (180*ang)/Mathf.PI;
-							if(ang < 0){
-								ang += 180;
-							}
-							flecha.transform.rotation = Quaternion.Euler(0,0,ang);
-							pulsa = true;
-						}else{
-							if(pulsa == true){
-								rigid.velocity = (ini-fin)/1;
-								pulsa = false;
-							}
-						}
-						if(Input.GetMouseButtonDown(0)){/*Control del mouse*/
-							flecha.SetActive(true);//flecha activada
-						}
 						if(Input.GetMouseButton(0)){
+							if(flecha.activeSelf == false){
+								flecha.SetActive(true);//flecha activada
+							}
 							fin = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);//obtiene la pocion en donde se toco la pantalla
 							pos_y = fin.y;
 							fin -= ini;
