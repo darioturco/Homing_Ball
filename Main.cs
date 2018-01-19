@@ -10,21 +10,22 @@ public class Main : MonoBehaviour {//7/1/2018
 	public Boton vel_x, menu, reset, cancel, nuevo_map, compartir, nuevo_map_v, atras_v, press_bot, rojo, verde, azul;
 	public Text gana_text, start_text, menu_text;
 	public Image vel_img, reset_img, press_img, gana_img, menu_img, map1_img, can_img, dif1_img, map2_img, vol_img, dif2_img, comp_img;
-	public Color[] claro, oscuro, solido, slider, victoria;
+	public Color[] claro, oscuro, solido, victoria;
 	public Slider dif_sld_menu, dif_sld_gana;
 	public ParticleSystem part;
 	public Animator anim;
 	public AudioSource menu_aud, pelota_aud, objet_aud;
 	public AudioClip bot_son;
 	public LayerMask mask;
+	private UnityADs ads;
 	private CircleCollider2D cir;
 	private Rigidbody2D rigid;
 	private bool pulsa, disparo, move, pausa, gano, press, isProcessing, isFocus;
-	private int i, cont, difi;
+	private int i, cont, difi, cont_ad;
 	private float ang, max, mid_x, pos_y, time;
 	private Vector2 ini, fin, pun;
-
 	void Awake () {
+		ads = GetComponent<UnityADs>();
 		cir = objetivo.GetComponent<CircleCollider2D>();
 		rigid = pelota.GetComponent<Rigidbody2D>();
 		ini = pelota.transform.position;
@@ -32,10 +33,9 @@ public class Main : MonoBehaviour {//7/1/2018
 		max = GameObject.Find("Arriba").transform.position.y-3.4f;
 		mid_x = 5.75f;
 		difi = 6;
-
 		/*borrar*/
-		string aus_s = Application.systemLanguage.ToString();
-		start_text.text = aus_s;
+		/*string aus_s = Application.systemLanguage.ToString();
+		start_text.text = aus_s;*/
 		//Debug.Log(aus_s);
 	}
 	IEnumerator crea_pro(float inicio, float dist, int max_obj, bool col, bool res){//inicion = poscision en la que los bloques empiezan a generarse
@@ -200,6 +200,7 @@ public class Main : MonoBehaviour {//7/1/2018
 					menu_aud.Play();
 				}
 				if(nuevo_map_v.up == true){
+					ads.ShowAds();
 					for(i=0;i<dest.Length;i++){
 						DestroyImmediate(dest[i]);//limpia los objetos
 					}
@@ -231,6 +232,7 @@ public class Main : MonoBehaviour {//7/1/2018
 				}
 				if(pausa == true){
 					if(nuevo_map.up == true){//crea un nuevo mapa
+						ads.ShowAds();
 						for(i=0;i<dest.Length;i++){
 							DestroyImmediate(dest[i]);//limpia los objetos
 						}
@@ -300,6 +302,11 @@ public class Main : MonoBehaviour {//7/1/2018
 							}
 							if(reset.up == true){//resetea la pelota a su poscision original
 								StartCoroutine("reset_cor");
+								cont_ad++;
+								if(cont_ad >= 15){
+									cont_ad = 0;
+									ads.ShowAds();
+								}
 							}
 						}
 					}
